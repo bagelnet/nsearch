@@ -1,3 +1,3 @@
 web: target/universal/stage/bin/nsearch \
--Dhttp.port=80 \
+-Dhttp.port=${PORT} \
 -Dplay.crypto.secret=${APPLICATION_SECRET}

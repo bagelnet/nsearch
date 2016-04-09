@@ -1,76 +1,46 @@
 package controllers
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
-import models.Content
+import com.google.inject.Inject
+import models.{Video, ContentInfo, Content}
 import play.api.libs.json.JsResult
-import play.api.libs.ws.WSConfigParser
-import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient, AhcWSClientConfig}
-import play.api.{Configuration, Environment, Mode}
+import play.api.libs.ws.WSClient
+import play.api.mvc.{Action, Controller}
+import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.Future
 
-class SearchController(url: String) {
-  val configuration = Configuration.reference ++ Configuration(ConfigFactory.parseString(
-    """
-      |ws.useragent = "nsearch"
-    """.stripMargin))
-  val environment = Environment(new File("."), this.getClass.getClassLoader, Mode.Prod)
+class SearchController @Inject() (ws: WSClient) extends Controller {
 
-  val parser = new WSConfigParser(configuration, environment)
-  val config = new AhcWSClientConfig(wsClientConfig = parser.parse())
-  val builder = new AhcConfigBuilder(config)
-//  val logging = new AsyncHttpClientConfig.AdditionalChannelInitializer() {
-//    override def initChannel(channel: io.netty.channel.Channel): Unit = {
-//      channel.pipeline.addFirst("log", new io.netty.handler.logging.LoggingHandler("debug"))
-//    }
-//  }
-  val ahcBuilder = builder.configure()
-//  ahcBuilder.setHttpAdditionalChannelInitializer(logging)
-  val ahcConfig = ahcBuilder.build()
-  val wsClient = new AhcWSClient(ahcConfig)
-
-  def search(params: Map[String, Any]): Unit = {
-    request(params) map {
-      res => if (isError(res.get.meta)) printError() else printResult(res.get)
+  def index = Action.async {
+    val params = Map("q" -> "test", "_sort" -> "viewCounter", "targets" -> "tagsExact", "fields" -> "contentId,title")
+    val response = search(params)
+    var totalCount: Int = 0
+    var videoList: List[Video] = List()
+    Future.firstCompletedOf(Seq(response)) map {
+      res =>
+        if (res.isDefined && !isError(res.get.get.meta)) {
+          totalCount = res.get.get.meta.totalCount.get
+          videoList = res.get.get.data.get.toList
+        } else {
+          totalCount = -1
+        }
+        Ok(views.html.index("keyword", totalCount, videoList))
     }
   }
 
-  private def request(params: Map[String, Any]): Future[JsResult[Content]] = {
-    wsClient.url(url).withBody(Map("param1" -> Seq("value1"))).get().map {
-      response => response.json.validate[Content]
+  def search(params: Map[String, String]): Future[Option[JsResult[Content]]]  = {
+    val baseUrl = "http://api.search.nicovideo.jp/api/v2/video/contents/search"
+    ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
+      response => {
+        Some(response.json.validate[Content])
+      }
+    }.recover {
+      case e: Exception => None
     }
   }
 
-  private def isError(meta: Object): Boolean = {
-    true
+  private def isError(meta: ContentInfo): Boolean = {
+    if (meta.status != 200) true else false
   }
-
-  def printError() = {
-    println("Error!!!!")
-  }
-
-  def printResult(contents: Content): Unit = {
-    println(contents.meta.totalCount)
-    contents.data.get.foreach {
-      video => println(video.contentId + ":" + video.title)
-    }
-  }
-
-
-
-//  private def parseJson(api_result: String): JsResult[Content] = {
-//    val json: JsValue = Json.parse(
-//      """
-//      | {"meta":{"status":200,"totalCount":4190},"data":[
-//      | {"view_counter":1027141,"title":"【初音ミク】みくみくにしてあげる♪【してやんよ】","is_sp_ok":true,"movie_type":"flv"},{"view_counter":772611,"title":"VOCALOID2 初音ミクに「Ievan Polkka」を歌わせてみた","is_sp_ok":true,"movie_type":"flv"},
-//      | {"view_counter":341103,"title":"初音ミクが可愛すぎるので描いてみた","is_sp_ok":true,"movie_type":"flv"},{"view_counter":269682,"title":"【初音ミク】恋スルVOC@LOID （修正版）【オリジナル曲】","is_sp_ok":true,"movie_type":"flv"},
-//      | ]}
-//    """.
-//        stripMargin
-//    )
-//    json.validate[Content]
-//  }
 }
 

@@ -1,6 +1,8 @@
 package controllers
 
 import javax.inject._
+import javax.naming.directory.SearchControls
+import models.Video
 import play.api._
 import play.api.mvc._
 
@@ -17,8 +19,12 @@ class HomeController @Inject() extends Controller {
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index = Action {
-    Ok(views.html.index("Your new application is ready."))
-  }
+//  def index = Action {
+//    var res = List[models.Video]()
+//    res :+= new Video("sm9", "test-sm9")
+//    res :+= new Video("sm100", "test-sm100")
+//    val res = controllers
+//    Ok(views.html.index("keyword", res))
+//  }
 
 }

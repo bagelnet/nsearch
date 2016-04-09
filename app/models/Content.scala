@@ -9,6 +9,10 @@ case class ContentInfo(status: Int, totalCount: Option[Int], errorCode: Option[S
 case class Video(contentId: String, title: String)
 
 object Content {
-  implicit def jsonWrites = Json.writes[Content]
-  implicit def jsonReads = Json.reads[Content]
+  implicit val contentInfoFormat = Json.format[ContentInfo]
+  implicit val videoFormat = Json.format[Video]
+  implicit val contentFormat = Json.format[Content]
+
+//  implicit def jsonWrites = Json.writes[Content]
+//  implicit def jsonReads = Json.reads[Content]
 }

@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def index = Action.async {
-    val params = Map("q" -> "test", "_sort" -> "viewCounter", "targets" -> "tagsExact", "fields" -> "contentId,title")
+    val params = Map("q" -> "test", "_sort" -> "viewCounter", "targets" -> "tagsExact", "fields" -> "contentId,title", "_context" -> "nsearch")
     val response = search(params)
     var totalCount: Int = 0
     var videoList: List[Video] = List()

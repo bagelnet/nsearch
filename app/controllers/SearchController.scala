@@ -31,7 +31,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
         } else {
           totalCount = -1
         }
-        Ok(views.html.index("keyword", totalCount, videoList))
+        Ok(views.html.index(params.getOrElse("q", "キーワードなし"), totalCount, videoList))
     }
   }
 

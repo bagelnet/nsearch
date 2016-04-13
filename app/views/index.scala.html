@@ -20,10 +20,21 @@
          * the page content. *@
         <p>Search Keyword: @message</p>
         <p>Total Hits : @totalCount </p>
+        <ul>
         @for(video <- result) {
-            <li><a href="http://www.nicovideo.jp/watch/@video.contentId" target="_blank">@video.title</a></li>
+            <li>
+                <ul>tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl
+                    <li><a href="http://www.nicovideo.jp/watch/@video.contentId" target="_blank">　@video.title　</a></li>
+                    <li>　@video.tags　</li>
+                    <li>　再生数: @video.viewCounter　</li>
+                    <li>　マイリスト数: @video.mylistCounter　</li>
+                    <li>　コメント数: @video.commentCounter　</li>
+                    <li>　投稿日時: @video.startTime　</li>
+                    <li> <img src="@video.thumbnailUrl" alt="thumbnail"> </li>
+                </ul>
+            </li>
         }
-
+        </ul>
 
     </body>
 </html>

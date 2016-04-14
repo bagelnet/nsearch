@@ -11,7 +11,7 @@
     <head>
         @* Here's where we render the page title `String`. *@
         <title>N-Search - Nicovideo Search</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/search.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <script src="@routes.Assets.versioned("javascripts/hello.js")" type="text/javascript"></script>
     </head>
@@ -23,9 +23,8 @@
         <ul>
         @for(video <- result) {
             <li>
-                <ul>
+                <ul class="video_info">
                     <li><a href="http://www.nicovideo.jp/watch/@video.contentId" target="_blank">　@video.title　</a></li>
-                    <li>　@video.tags　</li>
                     <li>　再生数: @video.viewCounter　</li>
                     <li>　マイリスト数: @video.mylistCounter　</li>
                     <li>　コメント数: @video.commentCounter　</li>

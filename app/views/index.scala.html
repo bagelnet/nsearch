@@ -5,6 +5,11 @@
  *@
 @(message: String, totalCount: Int, result: List[Video])
 
+@import org.joda.time.format._
+
+@dateFormat(video: Video) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(video.startTime))
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,21 +25,24 @@
          * the page content. *@
         <p>Search Keyword: @message</p>
         <p>Total Hits : @totalCount </p>
-        <ul>
-        @for(video <- result) {
-            <li>
-                <ul class="video_info">
-                    <li><a href="http://www.nicovideo.jp/watch/@video.contentId" target="_blank">　@video.title　</a></li>
-                    <li>　再生数: @video.viewCounter　</li>
-                    <li>　マイリスト数: @video.mylistCounter　</li>
-                    <li>　コメント数: @video.commentCounter　</li>
-                    <li>　投稿日時: @video.startTime　</li>
-                    <li> <img src="@video.thumbnailUrl" alt="thumbnail"> </li>
-                </ul>
-            </li>
-        }
-        </ul>
-
+        <div class="row">
+            @for(video <- result) {
+            <div class="col-xs-5 col-sm-4 col-md-3 col-lg-2">
+                <div class="thumbnail">
+                    <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
+                    <div class="caption">
+                        <p class="video-info vcounter"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>@video.viewCounter</p>
+                        <p class="video-info mcounter"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> @video.mylistCounter</p>
+                        <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @video.commentCounter</p>
+                        <p class="video-info stime"> @dateFormat(video) </p>
+                    </div>
+                    <div class="video-title">
+                        <p><a href="http://www.nicovideo.jp/watch/@video.contentId">@video.title</a></p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
     </body>
 </html>
 

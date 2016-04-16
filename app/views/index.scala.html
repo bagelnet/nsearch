@@ -22,32 +22,41 @@
     </head>
     <body>
         <div class="row">
-            <div class="search-form alert alert-info">
-                <div class="input-group search-box">
-                    <input type="search" class="form-control" value="@message">
-                    <span class="input-group-addon">@totalCount Hits</span>
-                    <span class="input-group-btn">
-                        <button class="btn btn-primary" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-                    </span>
-                </div>
+            <div class="col-sm-3 sidebar">
+                <ul class="nav nav-pills nav-stacked">
+                    <li role="presentation" class="active"><a href="#">1週間以内</a></li>
+                    <li role="presentation"><a href="#">1ヶ月以内</a></li>
+                    <li role="presentation"><a href="#">1年以内</a></li>
+                </ul>
             </div>
-            <div class="result-box">
-            @for(video <- result) {
-                <div class="col-xs-5 col-sm-4 col-md-3 col-lg-2">
-                    <div class="thumbnail">
-                        <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
-                        <div class="caption">
-                            <p class="video-info vcounter"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>@video.viewCounter</p>
-                            <p class="video-info mcounter"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> @video.mylistCounter</p>
-                            <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @video.commentCounter</p>
-                            <p class="video-info stime"> @dateFormat(video) </p>
-                        </div>
-                        <div class="video-title">
-                            <p><a href="http://www.nicovideo.jp/watch/@video.contentId">@video.title</a></p>
-                        </div>
+            <div class="col-sm-9 col-sm-offset-3 main">
+                <div class="search-form alert alert-info">
+                    <div class="input-group search-box">
+                        <input type="search" class="form-control" value="@message">
+                        <span class="input-group-addon">@totalCount Hits</span>
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                        </span>
                     </div>
                 </div>
-            }
+                <div class="result-box">
+                @for(video <- result) {
+                    <div class="col-sm-3">
+                        <div class="thumbnail">
+                            <p class="start-time"> @dateFormat(video) </p>
+                            <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
+                            <div class="caption">
+                                <p class="video-info vcounter"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>@video.viewCounter</p>
+                                <p class="video-info mcounter"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> @video.mylistCounter</p>
+                                <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @video.commentCounter</p>
+                            </div>
+                            <div class="video-title">
+                                <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title">@video.title</a></p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
             </div>
         </div>
     </body>

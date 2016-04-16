@@ -14,6 +14,7 @@
 
 .caption {
   font-size: small;
+  font-weight:bold;
   .video-info {
     margin-bottom: 0.1em;
   }
@@ -23,11 +24,33 @@
 }
 
 .thumbnail {
+  .start-time {
+    font-size: small;
+    font-weight:bold;
+    text-align: right;
+    margin: 0.1em;
+  }
   img {
     float: left;
     margin-right: 1em;
   }
   .video-title {
     clear: both;
+    height: 3em;
+    overflow: hidden;
   }
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  padding: 2em;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #CCC;
+  border-right: 1px solid #EEE;
 }

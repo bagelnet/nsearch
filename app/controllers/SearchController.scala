@@ -13,7 +13,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def index = Action.async {
     val params = Map(
-      "q" -> "test",
+      "q" -> "ゲーム",
       "targets" -> "tagsExact",
       "fields" -> "contentId,title,tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl",
       "filters[startTime][gt]" -> "2016-04-01T00:00:00+09:00",

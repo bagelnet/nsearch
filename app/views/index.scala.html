@@ -13,12 +13,10 @@
 
 @countFormat(count: Int) = @{
     count match {
-        case c if c < 1000 => <span> {s"${c}"} </span>
-        case c if c < 10000 => <span class="count-k"> {f"${c/1000.0}%.1f k"} </span>
-        case c if c < 1000000 => <span class="count-k"> {f"${c/1000}%03d k"} </span>
-        case c if c < 10000000 => <span class="count-m"> {f"${c/1000000.0}%.1f m"} </span>
-        case c if c < 1000000000 => <span class="count-m"> {f"${c/1000000}%03d m"} </span>
-        case _ => <span class="count-0"> {"many"} </span>
+        case c if c < 1000 => <span class="counter">{s"${c}"}</span>
+        case c if c < 1000000 => <span class="counter count-k">{f"${c/1000}%3d k"}</span>
+        case c if c < 1000000000 => <span class="counter count-m">{f"${c/1000000}%3d m"}</span>
+        case _ => <span class="counter count-0">{"many"}</span>
 
     }
 }
@@ -35,21 +33,44 @@
     <body>
         <div class="row">
             <div class="col-md-2 sidebar">
-                <ul class="nav nav-pills nav-stacked">
-                    <li role="presentation" class="active"><a href="#">1週間以内</a></li>
-                    <li role="presentation"><a href="#">1ヶ月以内</a></li>
-                    <li role="presentation"><a href="#">1年以内</a></li>
-                </ul>
+                <div class="options">
+                    <fieldset>
+                        <legend>ソート</legend>
+                        <div class="radio"><label><input type="radio" name="s" value="pd" form="q" checked>再生数が多い</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="rd" form="q">投稿日が新しい</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="md" form="q">マイリストが多い</label></div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>投稿日時</legend>
+                        <div class="radio"><label><input type="radio" name="r" value="0" form="q" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="1" form="q">24時間以内</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="7" form="q">1週間以内</label></div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>再生時間1</legend>
+                        <div class="radio"><label><input type="radio" name="p1" value="0" form="q" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="5" form="q">5分以内</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="10" form="q">10分以内</label></div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>再生時間2</legend>
+                        <div class="radio"><label><input type="radio" name="p2" value="0" form="q" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="5" form="q">5分以上</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="20" form="q">20分以上</label></div>
+                    </fieldset>
+                </div>
             </div>
-            <div class="col-md-10 col-md-offset-2 main">
+            <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
                 <div class="search-form alert alert-info">
-                    <div class="input-group search-box">
-                        <input type="search" class="form-control" value="@message">
-                        <span class="input-group-addon">@totalCount Hits</span>
-                        <span class="input-group-btn">
-                            <button class="btn btn-primary" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-                        </span>
-                    </div>
+                    <form action="#" accept-charset="UTF-8" name="q">
+                        <div class="input-group search-box">
+                            <input type="search" class="form-control" value="@message">
+                            <span class="input-group-addon">@totalCount Hits</span>
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
                 <div class="result-box">
                 @for(video <- result) {

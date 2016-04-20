@@ -1,7 +1,9 @@
 package controllers
 
 import com.google.inject.Inject
-import models.{Video, ContentInfo, Content}
+import models.{Video, ContentInfo, Content, Param}
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json.JsResult
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, Controller}
@@ -11,7 +13,19 @@ import scala.concurrent.Future
 
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
-  def index = Action.async {
+  def index = Action.async { implicit request =>
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "p1" -> number, "p2" -> number)(Param.apply)(Param.unapply))
+    var param:String = ""
+    form.bindFromRequest.fold(
+      errors => {
+        param = "nothing"
+//        BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toFlatJson(errors)))
+      },
+      message => {
+        param = message.toString
+      }
+    )
+
     val params = Map(
       "q" -> "ゲーム",
       "targets" -> "tagsExact",
@@ -31,7 +45,8 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
         } else {
           totalCount = -1
         }
-        Ok(views.html.index(params.getOrElse("q", "キーワードなし"), totalCount, videoList))
+        //Ok(views.html.index(params.getOrElse("q", "キーワードなし"), totalCount, videoList))
+        Ok(views.html.index(param, totalCount, videoList))
     }
   }
 

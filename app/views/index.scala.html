@@ -35,42 +35,49 @@
             <div class="col-md-2 sidebar">
                 <div class="options">
                     <fieldset>
+                        <legend>検索対象</legend>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="ti" form="main-form" checked>タイトル</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="de" form="main-form" checked>説明文</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="ta" form="main-form" checked>タグ(部分一致)</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tx" form="main-form">タグ(完全一致)</label></div>
+                    </fieldset>
+                    <fieldset>
                         <legend>ソート</legend>
-                        <div class="radio"><label><input type="radio" name="s" value="pd" form="q" checked>再生数が多い</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="rd" form="q">投稿日が新しい</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="md" form="q">マイリストが多い</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="pd" form="main-form" checked>再生数が多い</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="rd" form="main-form">投稿日が新しい</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="md" form="main-form">マイリストが多い</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>投稿日時</legend>
-                        <div class="radio"><label><input type="radio" name="r" value="0" form="q" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="1" form="q">24時間以内</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="7" form="q">1週間以内</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="0" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="1" form="main-form">24時間以内</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="7" form="main-form">1週間以内</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>再生時間1</legend>
-                        <div class="radio"><label><input type="radio" name="p1" value="0" form="q" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="5" form="q">5分以内</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="10" form="q">10分以内</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="0" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="5" form="main-form">5分以内</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="10" form="main-form">10分以内</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>再生時間2</legend>
-                        <div class="radio"><label><input type="radio" name="p2" value="0" form="q" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="5" form="q">5分以上</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="20" form="q">20分以上</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="0" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="5" form="main-form">5分以上</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="20" form="main-form">20分以上</label></div>
                     </fieldset>
                 </div>
             </div>
             <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
                 <div class="search-form alert alert-info">
-                    <form action="#" accept-charset="UTF-8" name="q">
+                    @helper.form( action = routes.SearchController.index(), 'id -> "main-form" ) {
                         <div class="input-group search-box">
-                            <input type="search" class="form-control" value="@message">
+                            <input type="search" class="form-control" name="q" value="@message">
                             <span class="input-group-addon">@totalCount Hits</span>
                             <span class="input-group-btn">
                                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                             </span>
                         </div>
-                    </form>
+                    }
                 </div>
                 <div class="result-box">
                 @for(video <- result) {

@@ -3,7 +3,7 @@
  * This template takes a single argument, a String containing a
  * message to display.
  *@
-@(message: String, totalCount: Int, result: List[Video])
+@(params: Map[String, String], totalCount: Int, result: List[Video])
 
 @import org.joda.time.format._
 @import org.joda.time.DateTime
@@ -22,8 +22,18 @@
     }
 }
 
-@getDateFilterValue(beforeDay: Int) = @{
-    new DateTime().minusDays(beforeDay).toString("yyyy-MM-dd'T'HH")
+@getDateFilterValue(beforeDay: Int, baseDate: Option[String]) = @{
+    baseDate.fold(new DateTime().minusDays(beforeDay).toString("yyyy-MM-dd'T'HH")) {
+        date => DateTimeFormat.forPattern("yyyy-MM-dd'T'HH").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(date))
+    }
+}
+
+@isTargetsCehck(field: String) = {
+    @if(params("targets").split(",").contains(field)){ checked }
+}
+
+@isSortCehck(field: String) = {
+    @if(params("_sort") == field){ checked }
 }
 
 <!DOCTYPE html>
@@ -41,34 +51,34 @@
                 <div class="options">
                     <fieldset>
                         <legend>検索対象</legend>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="title" form="main-form" checked>タイトル</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="description" form="main-form" checked>説明文</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tags" form="main-form" checked>タグ(部分一致)</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tagsExact" form="main-form">タグ(完全一致)</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="title" form="main-form" @isTargetsCehck("title")>タイトル</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="description" form="main-form" @isTargetsCehck("description")>説明文</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tags" form="main-form" @isTargetsCehck("tags")>タグ(部分一致)</label></div>
+                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tagsExact" form="main-form" @isTargetsCehck("tagsExact")>タグ(完全一致)</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>ソート</legend>
-                        <div class="radio"><label><input type="radio" name="s" value="dp" form="main-form" checked>再生数が多い</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="dr" form="main-form">投稿日が新しい</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="dm" form="main-form">マイリストが多い</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="dp" form="main-form" @isSortCehck("-viewCounter")>再生数が多い</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="dr" form="main-form" @isSortCehck("-startTime")>投稿日が新しい</label></div>
+                        <div class="radio"><label><input type="radio" name="s" value="dm" form="main-form" @isSortCehck("-mylistCounter")>マイリストが多い</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>投稿日時</legend>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(1)" form="main-form">前日</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(7)" form="main-form">先週</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(30)" form="main-form" checked> 先月 </label></div>
-                    </fieldset>
-                    <fieldset>
-                        <legend>再生時間1</legend>
-                        <div class="radio"><label><input type="radio" name="p1" value="100" form="main-form" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="5" form="main-form">5分以内</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="10" form="main-form">10分以内</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(0, Some(params("filters[startTime][gte]")))" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(1, None)" form="main-form">前日</label></div>
+                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(7, None)" form="main-form">先週</label></div>
                     </fieldset>
                     <fieldset>
                         <legend>再生時間2</legend>
-                        <div class="radio"><label><input type="radio" name="p2" value="0" form="main-form" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="5" form="main-form">5分以上</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="20" form="main-form">20分以上</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="@params("filters[lengthSeconds][gte]")" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="5" form="main-form">5分以上</label></div>
+                        <div class="radio"><label><input type="radio" name="p1" value="20" form="main-form">20分以上</label></div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>再生時間1</legend>
+                        <div class="radio"><label><input type="radio" name="p2" value="@params("filters[lengthSeconds][lte]")" form="main-form" checked>指定なし</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="5" form="main-form">5分以内</label></div>
+                        <div class="radio"><label><input type="radio" name="p2" value="10" form="main-form">10分以内</label></div>
                     </fieldset>
                 </div>
             </div>
@@ -76,7 +86,7 @@
                 <div class="search-form alert alert-info">
                     @helper.form( action = routes.SearchController.index(), 'id -> "main-form" ) {
                         <div class="input-group search-box">
-                            <input type="search" class="form-control" name="q" value="@message">
+                            <input type="search" class="form-control" name="q" value="@params("q")">
                             <span class="input-group-addon">@totalCount Hits</span>
                             <span class="input-group-btn">
                                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>

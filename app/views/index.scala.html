@@ -12,6 +12,10 @@
     DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(video.startTime))
 }
 
+@lengthFormat(second: Int) = @{
+    {f"${second/60}:${second%60}%02d"}
+}
+
 @countFormat(count: Int) = @{
     count match {
         case c if c < 1000 => <span class="counter">{s"${c}"}</span>
@@ -99,7 +103,10 @@
                     <div class="col-md-3">
                         <div class="thumbnail">
                             <p class="start-time"> @dateFormat(video) </p>
-                            <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
+                            <div class="fix">
+                                <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
+                                <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>
+                            </div>
                             <div class="caption">
                                 <p class="video-info vcounter"><span class="glyphicon glyphicon-play" aria-hidden="true"></span> @countFormat(video.viewCounter) </p>
                                 <p class="video-info mcounter"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> @countFormat(video.mylistCounter) </p>

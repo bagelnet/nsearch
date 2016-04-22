@@ -61,7 +61,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     Map(
     "q" -> "ゲーム",
     "targets" -> "tagsExact",
-    "fields" -> "contentId,title,tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl",
+    "fields" -> "contentId,title,tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl,lengthSeconds",
     "filters[startTime][gte]" -> new DateTime().minusDays(30).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
     "filters[lengthSeconds][gte]" -> "0",
     "filters[lengthSeconds][lte]" -> "6000",

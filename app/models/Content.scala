@@ -6,7 +6,7 @@ case class Content(meta: ContentInfo, data: Option[Array[Video]])
 
 case class ContentInfo(status: Int, totalCount: Option[Int], errorCode: Option[String])
 
-case class Video(contentId: String, title: String, tags: String, viewCounter: Int, mylistCounter: Int, commentCounter: Int, startTime: String, thumbnailUrl: String)
+case class Video(contentId: String, title: String, tags: String, viewCounter: Int, mylistCounter: Int, commentCounter: Int, startTime: String, thumbnailUrl: String, lengthSeconds: Int)
 
 object Content {
   implicit val contentInfoFormat = Json.format[ContentInfo]

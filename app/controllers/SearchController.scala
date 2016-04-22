@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.Optional
+
 import com.google.inject.Inject
 import models.{Video, ContentInfo, Content, Param}
 import org.joda.time.DateTime
@@ -16,7 +18,7 @@ import scala.concurrent.Future
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def index = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> text, "p1" -> number, "p2" -> number)(Param.apply)(Param.unapply))
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p1" -> optional(number), "p2" -> optional(number))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsDefault
     form.bindFromRequest.fold(
       errors => {

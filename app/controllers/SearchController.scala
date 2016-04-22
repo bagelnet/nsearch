@@ -74,9 +74,9 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     params foreach {
       case ("q", v) => params = params.updated("q", getParamsQuery(message.q).getOrElse(v))
       case ("targets", v) => params = params.updated("targets", getParamsTargets(message.t).getOrElse(v))
-      case ("filters[startTime][gte]", v) => params = params.updated("filters[startTime][gte]", getParamsTimeFilters(message.r).getOrElse(v))
-      case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p1).getOrElse(v))
-      case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p2).getOrElse(v))
+      case ("filters[startTime][gte]", v) => params = params.updated("filters[startTime][gte]", getParamsTimeFilters(message.r.getOrElse(v)).getOrElse(v))
+      case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p1.getOrElse(-1)).getOrElse(v))
+      case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p2.getOrElse(-1)).getOrElse(v))
       case ("_sort", v) => params = params.updated("_sort", getParamsSort(message.s).getOrElse(v))
       case ("fields", v) =>
       case ("_context", v) =>

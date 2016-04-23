@@ -6,6 +6,7 @@ import com.google.inject.Inject
 import models.{Video, ContentInfo, Content, Param}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.JsResult
@@ -116,7 +117,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case 'm' => "MylistCounter"
       case 'p' => "playCounter"
       case 'r' => "startTime"
-    }).toString()
+    }).mkString("")
     if (sort.matches("""[+\-][a-zA-Z]+[a-z]""")) Some(sort) else None
   }
 }

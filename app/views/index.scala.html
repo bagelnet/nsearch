@@ -1,10 +1,10 @@
-@(params: Map[String, String], totalCount: Int, result: List[Video])
+@(params: Map[String, String], totalCount: Int, result: List[Video], host: String)
 
 @import org.joda.time.format._
 @import org.joda.time.DateTime
 
-@dateFormat(video: Video) = @{
-    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(video.startTime))
+@dateFormat(dateString: String) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
 }
 
 @lengthFormat(second: Int) = @{
@@ -41,6 +41,9 @@
         <title>N-Search - Nicovideo Search</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/search.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.ico")">
+        <meta property="og:title" content="Nsearch - niconicoをゆるーく検索" />
+        <meta property="og:description" content="@dateFormat(params("filters[startTime][gte]")) 以降で「@params("q")」を含む動画は @totalCount 件ぐらいありますよ先輩" />
+        <meta property="og:image" content="http://@host/assets/images/nsearch.png" />
     </head>
     <body>
         <div class="row">
@@ -95,7 +98,7 @@
                 @for(video <- result) {
                     <div class="col-md-4 col-sm-6">
                         <div class="thumbnail">
-                            <p class="start-time"> @dateFormat(video) </p>
+                            <p class="start-time"> @dateFormat(video.startTime) </p>
                             <div class="fix">
                                 <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
                                 <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>

@@ -106,7 +106,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   private def getParamsLengthFilters(p: Int): Option[String] = {
-    if (p < 0) None else Some((p*60).toString)
+    if (p < 0) None else Some(p.toString)
   }
 
   private def getParamsSort(s: String): Option[String] = {
@@ -115,7 +115,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case 'a' => "+"
       case 'd' => "-"
       case 'm' => "MylistCounter"
-      case 'p' => "playCounter"
+      case 'p' => "viewCounter"
       case 'r' => "startTime"
     }).mkString("")
     if (sort.matches("""[+\-][a-zA-Z]+[a-z]""")) Some(sort) else None

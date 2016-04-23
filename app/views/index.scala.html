@@ -32,12 +32,12 @@
     }
 }
 
-@isTargetsCehck(field: String) = {
-    @if(params("targets").split(",").contains(field)){ checked }
+@isTargetsCehck(field: String) = @{
+    if(params("targets").split(",").contains(field)){ "checked" }
 }
 
-@isSortCehck(field: String) = {
-    @if(params("_sort") == field){ checked }
+@isSortCehck(field: String) = @{
+    if(params("_sort") == field){ "checked" }
 }
 
 <!DOCTYPE html>

@@ -114,7 +114,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     val sort: String = (s collect {
       case 'a' => "+"
       case 'd' => "-"
-      case 'm' => "MylistCounter"
+      case 'm' => "mylistCounter"
       case 'p' => "viewCounter"
       case 'r' => "startTime"
     }).mkString("")

@@ -1,4 +1,4 @@
-@(params: Map[String, String], totalCount: Int, result: List[Video], host: String)
+@(params: Map[String, String], totalCount: Int, result: List[Video], host: String, thumbnailName: String)
 
 @import org.joda.time.format._
 @import org.joda.time.DateTime
@@ -44,7 +44,7 @@
         <meta property="og:locale" content="ja_JP" />
         <meta property="og:title" content="Nsearch - niconicoをゆるーく検索" />
         <meta property="og:description" content="@dateFormat(params("filters[startTime][gte]")) 以降で「@params("q")」を含む動画は @totalCount 件ぐらいありますよ先輩" />
-        <meta property="og:image" content="http://@host/assets/images/nsearch.png" />
+        <meta property="og:image" content="http://@host/thumbnail/@thumbnailName" />
     </head>
     <body>
         <div class="row">

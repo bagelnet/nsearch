@@ -40,7 +40,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
         } else {
           totalCount = -1
         }
-        Ok(views.html.index(params, totalCount, videoList, request.host))
+        Ok(views.html.index(params, totalCount, videoList, request.host, getThumbnailName(videoList)))
     }
   }
 
@@ -118,6 +118,21 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case 'r' => "startTime"
     }).mkString("")
     if (sort.matches("""[+\-][a-zA-Z]+[a-z]""")) Some(sort) else None
+  }
+
+  private def getThumbnailName(vList: List[Video]): String = {
+    var urlList = List[String]()
+    vList foreach {
+      case v if !v.thumbnailUrl.isEmpty => urlList =  v.thumbnailUrl :: urlList
+      case _ =>
+    }
+    var idList = List[String]()
+    val Pattern = """http://[a-z\-]+([0-9]+).smilevideo.jp/smile\?i=([0-9]+)""".r
+    urlList foreach {
+      case Pattern(hostId, contentId) => idList = hostId + "_" + contentId :: idList
+      case _ =>
+    }
+    idList.take(3).mkString("-") + ".png"
   }
 }
 

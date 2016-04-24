@@ -5,6 +5,8 @@
 # An example controller showing a sample home page
 GET     /                           controllers.SearchController.index
 
+GET     /thumbnail/:ids.:ext         controllers.ImageController.index(ids: String, ext: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/fonts/*file         controllers.Assets.at(path="/public/lib/bootstrap/fonts",file)
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

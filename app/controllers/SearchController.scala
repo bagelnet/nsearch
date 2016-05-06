@@ -29,7 +29,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       }
     )
 
-    val response = search(params)
+    val response = search(Services.video, params)
     var totalCount: Int = 0
     var videoList: List[Video] = List()
     Future.firstCompletedOf(Seq(response)) map {
@@ -44,8 +44,8 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  def search(params: Map[String, String]): Future[Option[JsResult[Content]]]  = {
-    val baseUrl = "http://api.search.nicovideo.jp/api/v2/video/contents/search"
+  def search(service: String, params: Map[String, String]): Future[Option[JsResult[Content]]]  = {
+    val baseUrl = s"http://api.search.nicovideo.jp/api/v2/${service}/contents/search"
     ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
       response => {
         Some(response.json.validate[Content])
@@ -133,6 +133,13 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case _ =>
     }
     idList.take(3).mkString("-") + ".png"
+  }
+
+  object Services {
+    val video: String = "video"
+    val live: String = "live"
+    val seiga: String = "seiga"
+    val news: String = "news"
   }
 }
 

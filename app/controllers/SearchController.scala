@@ -18,7 +18,7 @@ import scala.concurrent.Future
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def index = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p1" -> optional(number), "p2" -> optional(number))(Param.apply)(Param.unapply))
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsDefault
     form.bindFromRequest.fold(
       errors => {
@@ -77,8 +77,8 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case ("q", v) => params = params.updated("q", getParamsQuery(message.q).getOrElse(v))
       case ("targets", v) => params = params.updated("targets", getParamsTargets(message.t).getOrElse(v))
       case ("filters[startTime][gte]", v) => params = params.updated("filters[startTime][gte]", getParamsTimeFilters(message.r.getOrElse(v)).getOrElse(v))
-      case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p1.getOrElse(-1)).getOrElse(v))
-      case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p2.getOrElse(-1)).getOrElse(v))
+      case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p.getOrElse(""), "min").getOrElse(v))
+      case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p.getOrElse(""), "max").getOrElse(v))
       case ("_sort", v) => params = params.updated("_sort", getParamsSort(message.s).getOrElse(v))
       case ("fields", v) =>
       case ("_context", v) =>
@@ -104,8 +104,18 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  private def getParamsLengthFilters(p: Int): Option[String] = {
-    if (p < 0) None else Some(p.toString)
+  private def getParamsLengthFilters(p: String, t: String): Option[String] = {
+    if (p.isEmpty) None
+    try {
+      val Array(min, max)  = p.split(',')
+      t match {
+        case "min" => if (min forall { _.isDigit }) Some((min.toInt*60).toString) else None
+        case "max" => if (max forall { _.isDigit }) Some((max.toInt*60).toString) else None
+        case _ => None
+      }
+    } catch {
+      case e: Exception => None
+    }
   }
 
   private def getParamsSort(s: String): Option[String] = {

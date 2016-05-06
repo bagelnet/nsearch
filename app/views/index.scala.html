@@ -1,16 +1,14 @@
-@(params: Map[String, String], totalCount: Int, result: List[Video], host: String, thumbnailName: String)
 
+@import scala.collection.immutable.HashMap
+@(params: Map[String, String], totalCount: Int, result: List[Video], host: String, thumbnailName: String)
 @import org.joda.time.format._
 @import org.joda.time.DateTime
-
 @dateFormat(dateString: String) = @{
     DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
 }
-
 @lengthFormat(second: Int) = @{
     {f"${second/60}:${second%60}%02d"}
 }
-
 @countFormat(count: Int) = @{
     count match {
         case c if c < 1000 => <span class="counter">{s"${c}"}</span>
@@ -20,81 +18,43 @@
 
     }
 }
-
 @getDateFilterValue(beforeDay: Int, baseDate: Option[String]) = @{
     baseDate.fold(new DateTime().minusDays(beforeDay).toString("yyyy-MM-dd'T'HH")) {
         date => DateTimeFormat.forPattern("yyyy-MM-dd'T'HH").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(date))
     }
 }
-
-@isTargetsCehck(field: String) = @{
-    if(params("targets").split(",").contains(field)){ "checked" }
-}
-
-@isSortCehck(field: String) = @{
-    if(params("_sort") == field){ "checked" }
-}
-
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-        <title>N-Search - Nicovideo Search</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/search.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.ico")">
-        <meta property="og:locale" content="ja_JP" />
-        <meta property="og:title" content="Nsearch - niconicoをゆるーく検索" />
-        <meta property="og:description" content="@dateFormat(params("filters[startTime][gte]")) 以降で「@params("q")」を含む動画は @totalCount 件ぐらいありますよ先輩" />
-        <meta property="og:image" content="http://@host/thumbnail/@thumbnailName" />
+        @head(params, totalCount,  host, thumbnailName)
     </head>
     <body>
         <div class="row">
             <div class="col-md-2 sidebar">
-                <div class="options">
-                    <fieldset>
-                        <legend>検索対象</legend>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="title" form="main-form" @isTargetsCehck("title")>タイトル</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="description" form="main-form" @isTargetsCehck("description")>説明文</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tags" form="main-form" @isTargetsCehck("tags")>タグ(部分一致)</label></div>
-                        <div class="checkbox"><label><input type="checkbox" name="t[]" value="tagsExact" form="main-form" @isTargetsCehck("tagsExact")>タグ(完全一致)</label></div>
-                    </fieldset>
-                    <fieldset>
-                        <legend>ソート</legend>
-                        <div class="radio"><label><input type="radio" name="s" value="dp" form="main-form" @isSortCehck("-viewCounter")>再生数が多い</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="dr" form="main-form" @isSortCehck("-startTime")>投稿日が新しい</label></div>
-                        <div class="radio"><label><input type="radio" name="s" value="dm" form="main-form" @isSortCehck("-mylistCounter")>マイリストが多い</label></div>
-                    </fieldset>
-                    <fieldset>
-                        <legend>投稿日時</legend>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(0, Some(params("filters[startTime][gte]")))" form="main-form" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(1, None)" form="main-form">前日</label></div>
-                        <div class="radio"><label><input type="radio" name="r" value="@getDateFilterValue(7, None)" form="main-form">先週</label></div>
-                    </fieldset>
-                    <fieldset>
-                        <legend>再生時間1</legend>
-                        <div class="radio"><label><input type="radio" name="p1" value="@params("filters[lengthSeconds][gte]")" form="main-form" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="300" form="main-form">5分以上</label></div>
-                        <div class="radio"><label><input type="radio" name="p1" value="1200" form="main-form">20分以上</label></div>
-                    </fieldset>
-                    <fieldset>
-                        <legend>再生時間2</legend>
-                        <div class="radio"><label><input type="radio" name="p2" value="@params("filters[lengthSeconds][lte]")" form="main-form" checked>指定なし</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="300" form="main-form">5分以内</label></div>
-                        <div class="radio"><label><input type="radio" name="p2" value="600" form="main-form">10分以内</label></div>
-                    </fieldset>
-                </div>
+                @sidebar(params,List(
+                    Map("type" -> "sort", "legend" -> "ソート",  "name" -> "s", "values" -> List(
+                        List("dp","-viewCounter","再生数が多い"),
+                        List("dr", "-startTime","投稿日が新しい"),
+                        List("dm","-mylistCounter","マイリストが多い"))
+                    ),
+                    Map("type" -> "targets", "legend" -> "検索対象",  "name" -> "t[]", "values" -> List(
+                        List("title","タイトル"),
+                        List("description", "説明文"),
+                        List("tags","タグ (部分一致)"),
+                        List("tagsExact","タグ (完全一致)"))
+                    ),
+                    Map("type" -> "radio", "legend" -> "投稿日時",  "name" -> "r", "values" -> List(
+                        List(getDateFilterValue(0, Some(params("filters[startTime][gte]"))), "checked","デフォルト"),
+                        List(getDateFilterValue(1, None), "","24時間以内"),
+                        List(getDateFilterValue(7, None), "","1週間以内"))
+                    ),
+                    Map("type" -> "range", "legend" -> "再生時間(分)",  "name" -> "p", "values" -> List(
+                        List("["+params("filters[lengthSeconds][gte]").toInt/60+","+params("filters[lengthSeconds][lte]").toInt/60+"]", "0", "60", "5"))
+                    )
+                ))
             </div>
             <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
-                <div class="search-form alert alert-info">
-                    @helper.form( action = routes.SearchController.index(), 'id -> "main-form" ) {
-                        <div class="input-group search-box">
-                            <input type="search" class="form-control" name="q" value="@params("q")">
-                            <span class="input-group-addon">@totalCount Hits</span>
-                            <span class="input-group-btn">
-                                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-                            </span>
-                        </div>
-                    }
-                </div>
+                @form(params, totalCount)
                 <div class="result-box">
                 @for(video <- result) {
                     <div class="col-md-4 col-sm-6">

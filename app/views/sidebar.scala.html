@@ -1,0 +1,42 @@
+@(params: Map[String, String], options: List[Map[String, Any]])
+
+@isTargetsCehck(field: String) = @{
+    if(params("targets").split(",").contains(field)){ "checked" }
+}
+@isSortCehck(field: String) = @{
+    if(params("_sort") == field){ "checked" }
+}
+@toList(values: Any) = @{
+    values match {
+        case vs: List[List[String]] => vs
+        case _ => throw new ClassCastException
+    }
+}
+<div class="options">
+    @for(option <- options) {
+    <fieldset>
+        <legend>@option("legend")</legend>
+        @if(option("type") == "sort") {
+            @for(value <- toList(option("values"))) {
+                <div class="radio"><label><input type="radio" name="@option("name")" value="@value(0)" form="main-form" @isSortCehck(value(1))>@value(2)</label></div>
+            }
+        }
+        @if(option("type") == "targets") {
+            @for(value <- toList(option("values"))) {
+                <div class="checkbox"><label><input type="checkbox" name="@option("name")" value="@value(0)" form="main-form" @isTargetsCehck(value(0))>@value(1)</label></div>
+            }
+        }
+        @if(option("type") == "radio") {
+            @for(value <- toList(option("values"))) {
+                <div class="radio"><label><input type="radio" name="@option("name")" value="@value(0)" form="main-form" @value(1)>@value(2)</label></div>
+            }
+        }
+        @if(option("type") == "range") {
+            @for(value <- toList(option("values"))) {
+                <input id="@option("name")" name="@option("name")" data-slider-id="@option("name")Slider" data-slider-value="@value(0)" form="main-form" type="text" class="span2" data-slider-min="@value(1)" data-slider-max="@value(2)" data-slider-step="@value(3)" />
+                <script type="text/javascript"> var slider = new Slider("#@option("name")", {tooltip: 'always'}); </script>
+            }
+        }
+    </fieldset>
+    }
+</div>

@@ -1,0 +1,12 @@
+@(params: Map[String, String], totalCount: Int)
+<div class="search-form alert alert-info">
+    @helper.form( action = routes.SearchController.index(), 'id -> "main-form" ) {
+        <div class="input-group search-box">
+            <input type="search" class="form-control" name="q" value="@params("q")">
+            <span class="input-group-addon">@totalCount Hits</span>
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+            </span>
+        </div>
+    }
+</div>

@@ -1,0 +1,14 @@
+@(params: Map[String, String], totalCount: Int,  host: String, thumbnailName: String)
+@import org.joda.time.format._
+@dateFormat(dateString: String) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
+}
+<title>N-Search - Nicovideo Search</title>
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/search.css")">
+<link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.ico")">
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap-slider/css/bootstrap-slider.min.css")">
+<script data-main="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript" src="@routes.Assets.versioned("lib/bootstrap-slider/bootstrap-slider.min.js")"></script>
+<meta property="og:locale" content="ja_JP" />
+<meta property="og:title" content="Nsearch - niconicoをゆるーく検索" />
+<meta property="og:description" content="@dateFormat(params("filters[startTime][gte]")) 以降で「@params("q")」を含む動画は @totalCount 件ぐらいありますよ先輩" />
+<meta property="og:image" content="http://@host/thumbnail/@thumbnailName" />

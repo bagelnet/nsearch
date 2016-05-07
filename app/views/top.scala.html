@@ -1,4 +1,4 @@
-@(result: Seq[Map[String,List[Video]]])
+@(videoes: List[Video], lives: List[Live], illusts: List[Illust])
 @import org.joda.time.format._
 @import org.joda.time.DateTime
 @dateFormat(dateString: String) = @{
@@ -31,11 +31,11 @@
             <div class="col-md-2 sidebar">
             </div>
             <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
-            @for(service <- result) {
-                @service.head._1
-                @for(video <- service.head._2) {
-                    @video.title
-                }
+            @for(video <- videoes) {
+                <p>@video.title</p>
+            }
+            @for(live <- lives) {
+                <p>@live.title</p>
             }
             </div>
         </div>

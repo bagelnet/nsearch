@@ -3,7 +3,7 @@ package controllers
 import java.util.Optional
 
 import com.google.inject.Inject
-import models.{Video, ContentInfo, Content, Param}
+import models._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import play.api.data.Form
@@ -18,12 +18,23 @@ import scala.concurrent.Future
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def top = Action.async {
-    val params: Seq[Map[String, Map[String, String]]] = Seq(Map(Services.video->getAPIParamsDefault))
-    val fs: Seq[Future[Option[Map[String,JsResult[Content]]]]] = params.map(p => search(p.head._1, p.head._2))
-    Future.sequence(fs).map { res =>
-      Ok(views.html.top(res.filter(r => r.isDefined && !isError(r.get.head._2.get.meta)).map(r => Map(r.get.head._1 -> r.get.head._2.get.data.get.toList))))
+    val params: Seq[Map[String, Map[String, String]]] = Seq(Map(Services.video->getAPIParamsDefault),Map(Services.live->getAPIParamsLiveDefault))
+    val fs: Seq[Future[Option[Map[String,JsResult[Any]]]]] = params.map(p => search(p.head._1, p.head._2))
+    var resultVideo: List[Video] = List()
+    var resultLive: List[Live] = List()
+    var resultIllust: List[Illust] = List()
+    Future.sequence(fs).map { responses =>
+      responses.map { response =>
+        response match {
+          case res: Option[Map[String,JsResult[ContentVideo]]] if (res.isDefined && res.get.head._1 == "video") => if(!isError(res.get.head._2.get.meta)) resultVideo = res.get.head._2.get.data.get.toList
+          case res: Option[Map[String,JsResult[ContentLive]]] if (res.isDefined && res.get.head._1 == "live")  => if(!isError(res.get.head._2.get.meta)) resultLive = res.get.head._2.get.data.get.toList
+          case res: Option[Map[String,JsResult[ContentIllust]]] if (res.isDefined && res.get.head._1 == "illust") => if(!isError(res.get.head._2.get.meta)) resultIllust = res.get.head._2.get.data.get.toList
+          case _ => throw new ClassCastException
+        }
+      }
+      Ok(views.html.top(resultVideo, resultLive, resultIllust))
     }.recover {
-      case e: Exception => Ok("RSSを取得できませんでした")
+      case e: Exception => Ok(views.html.top(resultVideo, resultLive, resultIllust))
     }
   }
 
@@ -43,22 +54,30 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     var totalCount: Int = 0
     var videoList: List[Video] = List()
     Future.firstCompletedOf(Seq(response)) map {
-      res =>
-        if (res.isDefined && !isError(res.get.head._2.get.meta)) {
-          totalCount = res.get.head._2.get.meta.totalCount.get
-          videoList = res.get.head._2.get.data.get.toList
-        } else {
-          totalCount = -1
+      response =>
+        response match {
+          case res: Option[Map[String,JsResult[ContentVideo]]] => {
+            if (res.isDefined && !isError(res.get.head._2.get.meta)) {
+              totalCount = res.get.head._2.get.meta.totalCount.get
+              videoList = res.get.head._2.get.data.get.toList
+            } else {
+              totalCount = -1
+            }
+            Ok(views.html.index(params, totalCount, videoList, request.host, getThumbnailName(videoList)))
+          }
         }
-        Ok(views.html.index(params, totalCount, videoList, request.host, getThumbnailName(videoList)))
     }
   }
 
-  def search(service: String, params: Map[String, String]): Future[Option[Map[String,JsResult[Content]]]]  = {
+  def search(service: String, params: Map[String, String])  = {
     val baseUrl = s"http://api.search.nicovideo.jp/api/v2/${service}/contents/search"
     ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
       response => {
-        Some(Map(service -> response.json.validate[Content]))
+        service match {
+          case "video" => Some(Map(service -> response.json.validate[ContentVideo]))
+          case "live" => Some(Map(service -> response.json.validate[ContentLive]))
+          case "illust" => Some(Map(service -> response.json.validate[ContentIllust]))
+        }
       }
     }.recover {
       case e: Exception => None
@@ -79,6 +98,16 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     "filters[lengthSeconds][lte]" -> "6000",
     "_sort" -> "-viewCounter",
     "_context" -> "nsearch")
+  }
+
+  private def getAPIParamsLiveDefault: Map[String, String] = {
+    Map(
+      "q" -> "ゲーム",
+      "targets" -> "tagsExact",
+      "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl",
+      "filters[startTime][gte]" -> new DateTime().minusDays(30).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
+      "_sort" -> "-viewCounter",
+      "_context" -> "nsearch")
   }
 
   private def createAPIParams(message: Param): Map[String, String] = {

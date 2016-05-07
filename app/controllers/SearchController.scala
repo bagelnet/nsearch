@@ -17,6 +17,16 @@ import scala.concurrent.Future
 
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
+  def top = Action.async {
+    val params: Seq[Map[String, Map[String, String]]] = Seq(Map(Services.video->getAPIParamsDefault))
+    val fs: Seq[Future[Option[Map[String,JsResult[Content]]]]] = params.map(p => search(p.head._1, p.head._2))
+    Future.sequence(fs).map { res =>
+      Ok(views.html.top(res.filter(r => r.isDefined && !isError(r.get.head._2.get.meta)).map(r => Map(r.get.head._1 -> r.get.head._2.get.data.get.toList))))
+    }.recover {
+      case e: Exception => Ok("RSSを取得できませんでした")
+    }
+  }
+
   def index = Action.async { implicit request =>
     val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsDefault
@@ -34,9 +44,9 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     var videoList: List[Video] = List()
     Future.firstCompletedOf(Seq(response)) map {
       res =>
-        if (res.isDefined && !isError(res.get.get.meta)) {
-          totalCount = res.get.get.meta.totalCount.get
-          videoList = res.get.get.data.get.toList
+        if (res.isDefined && !isError(res.get.head._2.get.meta)) {
+          totalCount = res.get.head._2.get.meta.totalCount.get
+          videoList = res.get.head._2.get.data.get.toList
         } else {
           totalCount = -1
         }
@@ -44,11 +54,11 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  def search(service: String, params: Map[String, String]): Future[Option[JsResult[Content]]]  = {
+  def search(service: String, params: Map[String, String]): Future[Option[Map[String,JsResult[Content]]]]  = {
     val baseUrl = s"http://api.search.nicovideo.jp/api/v2/${service}/contents/search"
     ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
       response => {
-        Some(response.json.validate[Content])
+        Some(Map(service -> response.json.validate[Content]))
       }
     }.recover {
       case e: Exception => None

@@ -1,0 +1,44 @@
+@(result: Seq[Map[String,List[Video]]])
+@import org.joda.time.format._
+@import org.joda.time.DateTime
+@dateFormat(dateString: String) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
+}
+@lengthFormat(second: Int) = @{
+    {f"${second/60}:${second%60}%02d"}
+}
+@countFormat(count: Int) = @{
+    count match {
+        case c if c < 1000 => <span class="counter">{s"${c}"}</span>
+        case c if c < 1000000 => <span class="counter count-k">{f"${c/1000}%3d k"}</span>
+        case c if c < 1000000000 => <span class="counter count-m">{f"${c/1000000}%3d m"}</span>
+        case _ => <span class="counter count-0">{"many"}</span>
+
+    }
+}
+@getDateFilterValue(beforeDay: Int, baseDate: Option[String]) = @{
+    baseDate.fold(new DateTime().minusDays(beforeDay).toString("yyyy-MM-dd'T'HH")) {
+        date => DateTimeFormat.forPattern("yyyy-MM-dd'T'HH").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(date))
+    }
+}
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        @head(Map(),-1, "", "")
+    </head>
+    <body>
+        <div class="row">
+            <div class="col-md-2 sidebar">
+            </div>
+            <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
+            @for(service <- result) {
+                @service.head._1
+                @for(video <- service.head._2) {
+                    @video.title
+                }
+            }
+            </div>
+        </div>
+    </body>
+</html>
+

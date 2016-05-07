@@ -3,7 +3,8 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.SearchController.index
+GET     /                           controllers.SearchController.top
+GET     /video                      controllers.SearchController.index
 
 GET     /thumbnail/:ids.:ext         controllers.ImageController.index(ids: String, ext: String)
 

@@ -42,7 +42,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def video = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsDefault
     form.bindFromRequest.fold(
       errors => {
@@ -73,7 +73,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def live = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsLiveDefault
     form.bindFromRequest.fold(
       errors => {
@@ -104,7 +104,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def illust = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsIllustDefault
     form.bindFromRequest.fold(
       errors => {
@@ -169,9 +169,11 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     Map(
       "q" -> "ゲーム",
       "targets" -> "tagsExact",
-      "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl",
+      "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl,providerType,communityIcon",
       "filters[startTime][gte]" -> new DateTime().minusDays(1).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
       "filters[-title][0]" -> "ニコ生クルーズ",
+      "filters[providerType][0]" -> "community",
+      "filters[liveStatus][0]" -> "",
       "_sort" -> "-viewCounter",
       "_context" -> "nsearch")
   }
@@ -194,6 +196,8 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case ("filters[startTime][gte]", v) => params = params.updated("filters[startTime][gte]", getParamsTimeFilters(message.r.getOrElse(v)).getOrElse(v))
       case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p.getOrElse(""), "min").getOrElse(v))
       case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p.getOrElse(""), "max").getOrElse(v))
+      case ("filters[providerType][0]", v) => params = params.updated("filters[providerType][0]", getParamsProviderTypeFilters(message.p.getOrElse("")).getOrElse(v))
+      case ("filters[liveStatus][0]", v) => params = params.updated("filters[liveStatus][0]", getParamsLiveStatusFilters(message.l.getOrElse("")).getOrElse(v))
       case ("_sort", v) => params = params.updated("_sort", getParamsSort(message.s).getOrElse(v))
       case ("fields", v) =>
       case ("_context", v) =>
@@ -234,12 +238,19 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
+  private def getParamsProviderTypeFilters(p: String): Option[String] = {
+    if (Set("official", "channel", "community").contains(p)) Some(p) else None
+  }
+
+  private def getParamsLiveStatusFilters(l: String): Option[String] = {
+    if (Set("past", "onair", "reserved").contains(l)) Some(l) else None
+  }
+
   private def getParamsSort(s: String): Option[String] = {
     if (s.length != 2) return None
     val sort: String = (s collect {
       case 'a' => "+"
       case 'd' => "-"
-      case 'l' => "liveRecent"
       case 'm' => "mylistCounter"
       case 'v' => "viewCounter"
       case 'r' => "startTime"

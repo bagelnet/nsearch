@@ -10,7 +10,7 @@ case class ContentIllust(meta: ContentInfo, data: Option[Array[Illust]])
 case class ContentInfo(status: Int, totalCount: Option[Int], errorCode: Option[String])
 
 case class Video (contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String], mylistCounter: Int, lengthSeconds: Int)
-case class Live  (contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String])
+case class Live  (contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String], providerType: Option[String], communityIcon: Option[String])
 case class Illust(contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String], mylistCounter: Int)
 
 object Content {

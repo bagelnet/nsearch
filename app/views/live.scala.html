@@ -35,6 +35,13 @@
         }
     }
 }
+@checkRadio(param: String, expected: String) = @{
+    if(param == expected) "checked"
+    else ""
+}
+@getLiveThumbnail(providerType: Option[String], thumbnailUrl: Option[String], communityIcon: Option[String]) = @{
+    if (providerType.getOrElse("") == "community") communityIcon.getOrElse("") else thumbnailUrl.getOrElse("")
+}
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -46,7 +53,8 @@
                 @sidebar(params,List(
                     Map("type" -> "sort", "legend" -> "ソート",  "name" -> "s", "values" -> List(
                         List("dv","-viewCounter","視聴数が多い"),
-                        List("al", "liveRecent","放送日が近い"))
+                        List("dr", "-startTime","放送日が新しい順"),
+                        List("ar", "+startTime","放送日が古い順"))
                     ),
                     Map("type" -> "targets", "legend" -> "検索対象",  "name" -> "t[]", "values" -> List(
                         List("title","タイトル"),
@@ -58,6 +66,16 @@
                         List(getDateFilterValue(0, Some(params("filters[startTime][gte]"))), "checked","デフォルト"),
                         List(getDateFilterValue(1, None), "","24時間以内"),
                         List(getDateFilterValue(7, None), "","1週間以内"))
+                    ),
+                    Map("type" -> "radio", "legend" -> "放送タイプ",  "name" -> "p", "values" -> List(
+                        List("official", checkRadio(params("filters[providerType][0]"), "official"), "公式"),
+                        List("channel", checkRadio(params("filters[providerType][0]"), "channel"), "チャンネル"),
+                        List("community", checkRadio(params("filters[providerType][0]"), "community"), "ユーザ"))
+                    ),
+                    Map("type" -> "radio", "legend" -> "オンエア",  "name" -> "l", "values" -> List(
+                        List("past", checkRadio(params("filters[liveStatus][0]"), "past"), "タイムシフト"),
+                        List("onair", checkRadio(params("filters[liveStatus][0]"), "onair"), "放送中"),
+                        List("reserved", checkRadio(params("filters[liveStatus][0]"), "reserved"), "放送予定"))
                     )
                 ))
             </div>
@@ -69,7 +87,7 @@
                         <div class="thumbnail">
                             <p class="start-time"> @dateFormat(video.startTime) </p>
                             <div class="fix">
-                                <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
+                                <img src="@getLiveThumbnail(video.providerType, video.thumbnailUrl, video.communityIcon)" alt="thumbnail" class="img-responsive">
                                 <div class="video-length"> @beforeFormat(video.startTime) </div>
                             </div>
                             <div class="caption">

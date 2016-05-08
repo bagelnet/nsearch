@@ -43,6 +43,9 @@
         date => DateTimeFormat.forPattern("yyyy-MM-dd'T'HH").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(date))
     }
 }
+@getLiveThumbnail(providerType: Option[String], thumbnailUrl: Option[String], communityIcon: Option[String]) = @{
+    if (providerType.getOrElse("") == "community") communityIcon.getOrElse("") else thumbnailUrl.getOrElse("")
+}
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -84,7 +87,7 @@
                             <div class="thumbnail">
                                 <p class="start-time"> @dateFormat(video.startTime) </p>
                                 <div class="fix">
-                                    <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
+                                    <img src="@getLiveThumbnail(video.providerType, video.thumbnailUrl, video.communityIcon)" alt="thumbnail" class="img-responsive">
                                     <div class="video-length"> @beforeFormat(video.startTime) </div>
                                 </div>
                                 <div class="caption">

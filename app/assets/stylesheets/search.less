@@ -7,6 +7,20 @@
 
 .result-box {
   padding: 1em;
+  .service-logo {
+    border-radius: 1em;
+    margin-bottom: 1em;
+    color: white;
+    &#top-list-video {
+      background-color: #99CCFF;
+    }
+    &#top-list-live {
+      background-color: #CC33FF;
+    }
+    &#top-list-illust {
+      background-color: #FFCC99;
+    }
+  }
 }
 
 .caption {
@@ -32,6 +46,17 @@
   .count-0 {
     color: @brand-danger
   }
+  .top-tags {
+    height: 1.8em;
+    overflow:hidden;
+    background-color: #9999CC;
+    border: #FFCCCC solid;
+    border-width: 0.2em 0em 0em 0.2em;
+    border-radius: 0.5em;
+    padding: 0.2em;
+    margin: 0 0 0.5em;
+    color: white;
+  }
 }
 
 .thumbnail {
@@ -49,6 +74,7 @@
     float: left;
     margin-right: 0.5em;
     position: relative;
+    overflow: hidden;
     .video-length {
       background-color: #000;
       bottom: 0;
@@ -85,6 +111,27 @@
     }
     .slider-selection {
       background: #89cdef;
+    }
+  }
+
+  .top-side-link {
+    border-style: solid;
+    border-width: 0em 0.2em 0.2em 0.5em;
+    border-color: #999999;
+    padding: 0.5em;
+    margin-bottom: 1em;
+    font-size: large;
+    font-weight: bold;
+    color: #333333;
+    background-color: white;
+    &#side-link-video {
+      border-left-color:  #3399FF;
+    }
+    &#side-link-live {
+      border-left-color:  #9900FF;
+    }
+    &#side-link-illust {
+      border-left-color:  #FF9933;
     }
   }
 }

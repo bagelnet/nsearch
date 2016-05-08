@@ -18,7 +18,10 @@ import scala.concurrent.Future
 class SearchController @Inject() (ws: WSClient) extends Controller {
 
   def top = Action.async {
-    val params: Seq[Map[String, Map[String, String]]] = Seq(Map(Services.video->getAPIParamsDefault),Map(Services.live->getAPIParamsLiveDefault))
+    val params: Seq[Map[String, Map[String, String]]] = Seq(
+      Map(Services.video -> getAPIParamsDefault),
+      Map(Services.live -> getAPIParamsLiveDefault),
+      Map(Services.illust -> getAPIParamsIllustDefault))
     val fs: Seq[Future[Option[Map[String,JsResult[Any]]]]] = params.map(p => search(p.head._1, p.head._2))
     var resultVideo: List[Video] = List()
     var resultLive: List[Live] = List()
@@ -70,7 +73,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def search(service: String, params: Map[String, String])  = {
-    val baseUrl = s"http://api.search.nicovideo.jp/api/v2/${service}/contents/search"
+    val baseUrl = s"http://api.search.nicovideo.jp/v2/${service}/contents/search"
     ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
       response => {
         service match {
@@ -90,10 +93,10 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   private def getAPIParamsDefault: Map[String, String] = {
     Map(
-    "q" -> "ゲーム",
+    "q" -> "",
     "targets" -> "tagsExact",
     "fields" -> "contentId,title,tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl,lengthSeconds",
-    "filters[startTime][gte]" -> new DateTime().minusDays(30).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
+    "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
     "filters[lengthSeconds][gte]" -> "0",
     "filters[lengthSeconds][lte]" -> "6000",
     "_sort" -> "-viewCounter",
@@ -102,10 +105,21 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   private def getAPIParamsLiveDefault: Map[String, String] = {
     Map(
-      "q" -> "ゲーム",
+      "q" -> "",
       "targets" -> "tagsExact",
       "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl",
-      "filters[startTime][gte]" -> new DateTime().minusDays(30).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
+      "filters[startTime][gte]" -> new DateTime().minusDays(1).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
+      "filters[-title][0]" -> "ニコ生クルーズ",
+      "_sort" -> "-viewCounter",
+      "_context" -> "nsearch")
+  }
+
+  private def getAPIParamsIllustDefault: Map[String, String] = {
+    Map(
+      "q" -> "",
+      "targets" -> "tagsExact",
+      "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl,mylistCounter",
+      "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
       "_sort" -> "-viewCounter",
       "_context" -> "nsearch")
   }
@@ -162,6 +176,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     val sort: String = (s collect {
       case 'a' => "+"
       case 'd' => "-"
+      case 'l' => "liveRecent"
       case 'm' => "mylistCounter"
       case 'p' => "viewCounter"
       case 'r' => "startTime"
@@ -172,7 +187,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   private def getThumbnailName(vList: List[Video]): String = {
     var urlList = List[String]()
     vList foreach {
-      case v if !v.thumbnailUrl.isEmpty => urlList =  v.thumbnailUrl :: urlList
+      case v if !v.thumbnailUrl.isEmpty => urlList =  v.thumbnailUrl.get :: urlList
       case _ =>
     }
     var idList = List[String]()
@@ -187,7 +202,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   object Services {
     val video: String = "video"
     val live: String = "live"
-    val seiga: String = "seiga"
+    val illust: String = "illust"
     val news: String = "news"
   }
 }

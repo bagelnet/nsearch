@@ -9,9 +9,9 @@ case class ContentIllust(meta: ContentInfo, data: Option[Array[Illust]])
 
 case class ContentInfo(status: Int, totalCount: Option[Int], errorCode: Option[String])
 
-case class Video (contentId: String, title: String, tags: String, viewCounter: Int, commentCounter: Int, startTime: String, thumbnailUrl: String, mylistCounter: Int, lengthSeconds: Int)
-case class Live  (contentId: String, title: String, tags: String, viewCounter: Int, commentCounter: Int, startTime: String, thumbnailUrl: String)
-case class Illust(contentId: String, title: String, tags: String, viewCounter: Int, commentCounter: Int, startTime: String, thumbnailUrl: String, mylistCounter: Int)
+case class Video (contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String], mylistCounter: Int, lengthSeconds: Int)
+case class Live  (contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String])
+case class Illust(contentId: String, title: Option[String], tags: Option[String], viewCounter: Int, commentCounter: Int, startTime: Option[String], thumbnailUrl: Option[String], mylistCounter: Int)
 
 object Content {
   implicit val contentInfoFormat = Json.format[ContentInfo]

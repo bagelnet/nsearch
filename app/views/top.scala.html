@@ -1,11 +1,33 @@
 @(videoes: List[Video], lives: List[Live], illusts: List[Illust])
 @import org.joda.time.format._
 @import org.joda.time.DateTime
-@dateFormat(dateString: String) = @{
-    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
+@import org.joda.time.Duration
+@dateFormat(dateString: Option[String]) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString.getOrElse("0000-00-00T00:00:00+0900")))
 }
 @lengthFormat(second: Int) = @{
     {f"${second/60}:${second%60}%02d"}
+}
+@beforeFormat(dateString: Option[String]) = @{
+    val d = new Duration(new DateTime(), DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString.getOrElse("0000-00-00T00:00:00+0900")))
+    val diff = d.getStandardDays()
+    if (-1 >= diff) s"${-1*diff}日前"
+    else if (1 <= diff) s"${diff}日後"
+    else {
+        val diff = d.getStandardHours()
+        if (-1 > diff) s"${-1*diff}時間前"
+        else if (1 < diff) s"${diff}時間後"
+        else {
+            val diff = d.getStandardMinutes()
+            if (0 >= diff) s"${-1*diff}分前"
+            else s"${diff}分後"
+        }
+    }
+}
+@tagsFormat(tags: Option[String]) = {
+    @for(tag <- tags.getOrElse("").split(' ')) {
+        <a href="hoge" title="@tag"><p class="top-tags"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> @tag</p></a>
+    }
 }
 @countFormat(count: Int) = @{
     count match {
@@ -29,14 +51,73 @@
     <body>
         <div class="row">
             <div class="col-md-2 sidebar">
+                <a href="video"><div class="top-side-link" id="side-link-video">動画</div></a>
+                <a href="live"><div class="top-side-link" id="side-link-live">生放送</div></a>
+                <a href="illust"><div class="top-side-link" id="side-link-illust">イラスト</div></a>
             </div>
             <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
-            @for(video <- videoes) {
-                <p>@video.title</p>
-            }
-            @for(live <- lives) {
-                <p>@live.title</p>
-            }
+                <div class="result-box">
+                    <div class="top-list col-md2 col-sm-4">
+                        <a href="video"><div id="top-list-video" class="service-logo"><img src="@routes.Assets.versioned("images/video.png")">もっと見る</div></a>
+                    @for(video <- videoes) {
+                        <div class="col-md-12 col-sm-12">
+                            <div class="thumbnail">
+                                <p class="start-time"> @dateFormat(video.startTime) </p>
+                                <div class="fix">
+                                    <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
+                                    <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>
+                                </div>
+                                <div class="caption">
+                                    @tagsFormat(video.tags)
+                                </div>
+                                <div class="video-title">
+                                    <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                    <div class="top-list col-md2 col-sm-4">
+                        <a href="live"><div id="top-list-live" class="service-logo"><img src="@routes.Assets.versioned("images/live.png")">もっと見る</div></a>
+                    @for(video <- lives) {
+                        <div class="col-md-12 col-sm-12">
+                            <div class="thumbnail">
+                                <p class="start-time"> @dateFormat(video.startTime) </p>
+                                <div class="fix">
+                                    <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
+                                    <div class="video-length"> @beforeFormat(video.startTime) </div>
+                                </div>
+                                <div class="caption">
+                                    @tagsFormat(video.tags)
+                                </div>
+                                <div class="video-title">
+                                    <p><a href="http://live.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                    <div class="top-list col-md2 col-sm-4">
+                        <a href="illust"><div id="top-list-illust" class="service-logo"><img src="@routes.Assets.versioned("images/illust.png")">もっと見る</div></a>
+                    @for(video <- illusts) {
+                        <div class="col-md-12 col-sm-12">
+                            <div class="thumbnail">
+                                <p class="start-time"> @dateFormat(video.startTime) </p>
+                                <div class="fix">
+                                    <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
+                                    <div class="video-length"> @beforeFormat(video.startTime) </div>
+                                </div>
+                                <div class="caption">
+                                    @tagsFormat(video.tags)
+                                </div>
+                                <div class="video-title">
+                                    <p><a href="http://seiga.nicovideo.jp/seiga/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                </div>
             </div>
         </div>
     </body>

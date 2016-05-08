@@ -1,8 +1,8 @@
 @(params: Map[String, String], totalCount: Int, result: List[Video], host: String, thumbnailName: String)
 @import org.joda.time.format._
 @import org.joda.time.DateTime
-@dateFormat(dateString: String) = @{
-    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString))
+@dateFormat(dateString: Option[String]) = @{
+    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString.getOrElse("0000-00-00T00:00:00+0900")))
 }
 @lengthFormat(second: Int) = @{
     {f"${second/60}:${second%60}%02d"}
@@ -59,7 +59,7 @@
                         <div class="thumbnail">
                             <p class="start-time"> @dateFormat(video.startTime) </p>
                             <div class="fix">
-                                <img src="@video.thumbnailUrl" alt="thumbnail" class="img-responsive">
+                                <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
                                 <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>
                             </div>
                             <div class="caption">
@@ -68,7 +68,7 @@
                                 <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @countFormat(video.commentCounter) </p>
                             </div>
                             <div class="video-title">
-                                <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title">@video.title</a></p>
+                                <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
                             </div>
                         </div>
                     </div>

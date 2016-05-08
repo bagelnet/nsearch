@@ -48,6 +48,12 @@
                     ),
                     Map("type" -> "range", "legend" -> "再生時間(分)",  "name" -> "p", "values" -> List(
                         List("["+params("filters[lengthSeconds][gte]").toInt/60+","+params("filters[lengthSeconds][lte]").toInt/60+"]", "0", "60", "5"))
+                    ),
+                    Map("type" -> "range", "legend" -> "再生数",  "name" -> "v", "values" -> List(
+                        List("["+params("filters[viewCounter][gte]")+","+params("filters[viewCounter][lte]")+"]", "0", "10000", "1000"))
+                    ),
+                    Map("type" -> "range", "legend" -> "マイリスト数",  "name" -> "m", "values" -> List(
+                        List("["+params("filters[mylistCounter][gte]")+","+params("filters[mylistCounter][lte]")+"]", "0", "1000", "100"))
                     )
                 ))
             </div>

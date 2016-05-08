@@ -42,7 +42,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def video = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
+    val form = setForm
     var params: Map[String, String] = getAPIParamsDefault
     form.bindFromRequest.fold(
       errors => {
@@ -73,7 +73,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def live = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
+    val form = setForm
     var params: Map[String, String] = getAPIParamsLiveDefault
     form.bindFromRequest.fold(
       errors => {
@@ -104,7 +104,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def illust = Action.async { implicit request =>
-    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
+    val form = setForm
     var params: Map[String, String] = getAPIParamsIllustDefault
     form.bindFromRequest.fold(
       errors => {
@@ -149,6 +149,10 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
+  private def setForm: Form[Param] = {
+    Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text), "v" -> optional(text), "m" -> optional(text), "l" -> optional(text))(Param.apply)(Param.unapply))
+  }
+
   private def isError(meta: ContentInfo): Boolean = {
     if (meta.status != 200) true else false
   }
@@ -161,6 +165,10 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
     "filters[lengthSeconds][gte]" -> "0",
     "filters[lengthSeconds][lte]" -> "6000",
+    "filters[viewCounter][gte]" -> "0",
+    "filters[viewCounter][lte]" -> "10000",
+    "filters[mylistCounter][gte]" -> "0",
+    "filters[mylistCounter][lte]" -> "1000",
     "_sort" -> "-viewCounter",
     "_context" -> "nsearch")
   }
@@ -184,6 +192,10 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       "targets" -> "tagsExact",
       "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl,mylistCounter",
       "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
+      "filters[viewCounter][gte]" -> "0",
+      "filters[viewCounter][lte]" -> "10000",
+      "filters[mylistCounter][gte]" -> "0",
+      "filters[mylistCounter][lte]" -> "1000",
       "_sort" -> "-viewCounter",
       "_context" -> "nsearch")
   }
@@ -196,6 +208,10 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case ("filters[startTime][gte]", v) => params = params.updated("filters[startTime][gte]", getParamsTimeFilters(message.r.getOrElse(v)).getOrElse(v))
       case ("filters[lengthSeconds][gte]", v) => params = params.updated("filters[lengthSeconds][gte]", getParamsLengthFilters(message.p.getOrElse(""), "min").getOrElse(v))
       case ("filters[lengthSeconds][lte]", v) => params = params.updated("filters[lengthSeconds][lte]", getParamsLengthFilters(message.p.getOrElse(""), "max").getOrElse(v))
+      case ("filters[viewCounter][gte]", v) => params = params.updated("filters[viewCounter][gte]", getParamsRangeFilters(message.v.getOrElse(""), "min").getOrElse(v))
+      case ("filters[viewCounter][lte]", v) => params = params.updated("filters[viewCounter][lte]", getParamsRangeFilters(message.v.getOrElse(""), "max").getOrElse(v))
+      case ("filters[mylistCounter][gte]", v) => params = params.updated("filters[mylistCounter][gte]", getParamsRangeFilters(message.m.getOrElse(""), "min").getOrElse(v))
+      case ("filters[mylistCounter][lte]", v) => params = params.updated("filters[mylistCounter][lte]", getParamsRangeFilters(message.m.getOrElse(""), "max").getOrElse(v))
       case ("filters[providerType][0]", v) => params = params.updated("filters[providerType][0]", getParamsProviderTypeFilters(message.p.getOrElse("")).getOrElse(v))
       case ("filters[liveStatus][0]", v) => params = params.updated("filters[liveStatus][0]", getParamsLiveStatusFilters(message.l.getOrElse("")).getOrElse(v))
       case ("_sort", v) => params = params.updated("_sort", getParamsSort(message.s).getOrElse(v))
@@ -224,18 +240,23 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  private def getParamsLengthFilters(p: String, t: String): Option[String] = {
+  private def getParamsRangeFilters(p: String, t: String): Option[String] = {
     if (p.isEmpty) None
     try {
       val Array(min, max)  = p.split(',')
       t match {
-        case "min" => if (min forall { _.isDigit }) Some((min.toInt*60).toString) else None
-        case "max" => if (max forall { _.isDigit }) Some((max.toInt*60).toString) else None
+        case "min" => if (min forall { _.isDigit }) Some(min) else None
+        case "max" => if (max forall { _.isDigit }) Some(max) else None
         case _ => None
       }
     } catch {
       case e: Exception => None
     }
+  }
+
+  private def getParamsLengthFilters(p: String, t: String): Option[String] = {
+    val f:Option[String] = getParamsRangeFilters(p, t)
+    if (f.isDefined) Some((f.get.toInt*60).toString) else f
   }
 
   private def getParamsProviderTypeFilters(p: String): Option[String] = {

@@ -180,7 +180,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl,providerType,communityIcon",
       "filters[startTime][gte]" -> new DateTime().minusDays(1).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
       "filters[-title][0]" -> "ニコ生クルーズ",
-      "filters[providerType][0]" -> "community",
+      "filters[providerType][0]" -> "channel",
       "filters[liveStatus][0]" -> "",
       "_sort" -> "-viewCounter",
       "_context" -> "nsearch")

@@ -45,7 +45,7 @@
             <div class="col-md-2 sidebar">
                 @sidebar(params,List(
                     Map("type" -> "sort", "legend" -> "ソート",  "name" -> "s", "values" -> List(
-                        List("dp","-viewCounter","再生数が多い"),
+                        List("dv","-viewCounter","再生数が多い"),
                         List("dr", "-startTime","投稿日が新しい"),
                         List("dm","-mylistCounter","クリップが多い"))
                     ),
@@ -79,7 +79,7 @@
                                 <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @countFormat(video.commentCounter) </p>
                             </div>
                             <div class="video-title">
-                                <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
+                                <p><a href="http://seiga.nicovideo.jp/seiga/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
                             </div>
                         </div>
                     </div>

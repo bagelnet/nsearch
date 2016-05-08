@@ -241,7 +241,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case 'd' => "-"
       case 'l' => "liveRecent"
       case 'm' => "mylistCounter"
-      case 'p' => "viewCounter"
+      case 'v' => "viewCounter"
       case 'r' => "startTime"
     }).mkString("")
     if (sort.matches("""[+\-][a-zA-Z]+[a-z]""")) Some(sort) else None

@@ -24,9 +24,9 @@
         }
     }
 }
-@tagsFormat(tags: Option[String]) = {
+@tagsFormat(service: String, tags: Option[String]) = {
     @for(tag <- tags.getOrElse("").split(' ')) {
-        <a href="hoge" title="@tag"><p class="top-tags"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> @tag</p></a>
+        <a href="@service?t[]=tagsExact&s=dv&q=@helper.urlEncode(tag)" title="@tag"><p class="top-tags"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> @tag</p></a>
     }
 }
 @countFormat(count: Int) = @{
@@ -68,7 +68,7 @@
                                     <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>
                                 </div>
                                 <div class="caption">
-                                    @tagsFormat(video.tags)
+                                    @tagsFormat("video", video.tags)
                                 </div>
                                 <div class="video-title">
                                     <p><a href="http://www.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
@@ -88,7 +88,7 @@
                                     <div class="video-length"> @beforeFormat(video.startTime) </div>
                                 </div>
                                 <div class="caption">
-                                    @tagsFormat(video.tags)
+                                    @tagsFormat("live", video.tags)
                                 </div>
                                 <div class="video-title">
                                     <p><a href="http://live.nicovideo.jp/watch/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>
@@ -108,7 +108,7 @@
                                     <div class="video-length"> @beforeFormat(video.startTime) </div>
                                 </div>
                                 <div class="caption">
-                                    @tagsFormat(video.tags)
+                                    @tagsFormat("illust", video.tags)
                                 </div>
                                 <div class="video-title">
                                     <p><a href="http://seiga.nicovideo.jp/seiga/@video.contentId" title="@video.title.getOrElse("")">@video.title.getOrElse("")</a></p>

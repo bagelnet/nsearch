@@ -135,7 +135,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
   }
 
   def search(service: String, params: Map[String, String])  = {
-    val baseUrl = s"http://api.search.nicovideo.jp/v2/${service}/contents/search"
+    val baseUrl = s"http://api.search.nicovideo.jp/api/v2/${service}/contents/search"
     ws.url(baseUrl).withQueryString(params.toList: _*).get().map {
       response => {
         service match {
@@ -155,7 +155,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   private def getAPIParamsDefault: Map[String, String] = {
     Map(
-    "q" -> "",
+    "q" -> "ゲーム",
     "targets" -> "tagsExact",
     "fields" -> "contentId,title,tags,viewCounter,mylistCounter,commentCounter,startTime,thumbnailUrl,lengthSeconds",
     "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
@@ -167,7 +167,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   private def getAPIParamsLiveDefault: Map[String, String] = {
     Map(
-      "q" -> "",
+      "q" -> "ゲーム",
       "targets" -> "tagsExact",
       "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl",
       "filters[startTime][gte]" -> new DateTime().minusDays(1).toString("yyyy-MM-dd'T'HH:mm:ssZ"),
@@ -178,7 +178,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
 
   private def getAPIParamsIllustDefault: Map[String, String] = {
     Map(
-      "q" -> "",
+      "q" -> "ゲーム",
       "targets" -> "tagsExact",
       "fields" -> "contentId,title,tags,viewCounter,commentCounter,startTime,thumbnailUrl,mylistCounter",
       "filters[startTime][gte]" -> new DateTime().minusDays(7).toString("yyyy-MM-dd'T'HH:mm:ssZ"),

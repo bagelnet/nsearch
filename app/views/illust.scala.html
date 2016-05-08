@@ -1,11 +1,9 @@
-@(params: Map[String, String], totalCount: Int, result: List[Video], host: String, thumbnailName: String)
+@(params: Map[String, String], totalCount: Int, result: List[Illust], host: String, thumbnailName: String)
 @import org.joda.time.format._
 @import org.joda.time.DateTime
+@import org.joda.time.Duration
 @dateFormat(dateString: Option[String]) = @{
     DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString.getOrElse("0000-00-00T00:00:00+0900")))
-}
-@lengthFormat(second: Int) = @{
-    {f"${second/60}:${second%60}%02d"}
 }
 @countFormat(count: Int) = @{
     count match {
@@ -21,6 +19,22 @@
         date => DateTimeFormat.forPattern("yyyy-MM-dd'T'HH").print(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(date))
     }
 }
+@beforeFormat(dateString: Option[String]) = @{
+    val d = new Duration(new DateTime(), DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").parseDateTime(dateString.getOrElse("0000-00-00T00:00:00+0900")))
+    val diff = d.getStandardDays()
+    if (-1 >= diff) s"${-1*diff}日前"
+    else if (1 <= diff) s"${diff}日後"
+    else {
+        val diff = d.getStandardHours()
+        if (-1 > diff) s"${-1*diff}時間前"
+        else if (1 < diff) s"${diff}時間後"
+        else {
+            val diff = d.getStandardMinutes()
+            if (0 >= diff) s"${-1*diff}分前"
+            else s"${diff}分後"
+        }
+    }
+}
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -33,7 +47,7 @@
                     Map("type" -> "sort", "legend" -> "ソート",  "name" -> "s", "values" -> List(
                         List("dp","-viewCounter","再生数が多い"),
                         List("dr", "-startTime","投稿日が新しい"),
-                        List("dm","-mylistCounter","マイリストが多い"))
+                        List("dm","-mylistCounter","クリップが多い"))
                     ),
                     Map("type" -> "targets", "legend" -> "検索対象",  "name" -> "t[]", "values" -> List(
                         List("title","タイトル"),
@@ -45,14 +59,11 @@
                         List(getDateFilterValue(0, Some(params("filters[startTime][gte]"))), "checked","デフォルト"),
                         List(getDateFilterValue(1, None), "","24時間以内"),
                         List(getDateFilterValue(7, None), "","1週間以内"))
-                    ),
-                    Map("type" -> "range", "legend" -> "再生時間(分)",  "name" -> "p", "values" -> List(
-                        List("["+params("filters[lengthSeconds][gte]").toInt/60+","+params("filters[lengthSeconds][lte]").toInt/60+"]", "0", "60", "5"))
                     )
                 ))
             </div>
             <div class="col-md-10 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 main">
-                @form(routes.SearchController.video(), params, totalCount)
+                @form(routes.SearchController.illust(), params, totalCount)
                 <div class="result-box">
                 @for(video <- result) {
                     <div class="col-md-4 col-sm-6">
@@ -60,11 +71,11 @@
                             <p class="start-time"> @dateFormat(video.startTime) </p>
                             <div class="fix">
                                 <img src="@video.thumbnailUrl.getOrElse("")" alt="thumbnail" class="img-responsive">
-                                <div class="video-length"> @lengthFormat(video.lengthSeconds) </div>
+                                <div class="video-length"> @beforeFormat(video.startTime) </div>
                             </div>
                             <div class="caption">
                                 <p class="video-info vcounter"><span class="glyphicon glyphicon-play" aria-hidden="true"></span> @countFormat(video.viewCounter) </p>
-                                <p class="video-info mcounter"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> @countFormat(video.mylistCounter) </p>
+                                <p class="video-info mcounter"><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span> @countFormat(video.mylistCounter) </p>
                                 <p class="video-info ccounter"><span class="glyphicon glyphicon-copyright-mark" aria-hidden="true"></span> @countFormat(video.commentCounter) </p>
                             </div>
                             <div class="video-title">

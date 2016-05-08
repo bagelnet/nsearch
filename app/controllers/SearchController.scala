@@ -41,7 +41,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  def index = Action.async { implicit request =>
+  def video = Action.async { implicit request =>
     val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
     var params: Map[String, String] = getAPIParamsDefault
     form.bindFromRequest.fold(
@@ -49,7 +49,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
         // use default params for initial access or parameter error
       },
       message => {
-        params = createAPIParams(message)
+        params = createAPIParams(message, params)
       }
     )
 
@@ -67,6 +67,68 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
               totalCount = -1
             }
             Ok(views.html.index(params, totalCount, videoList, request.host, getThumbnailName(videoList)))
+          }
+        }
+    }
+  }
+
+  def live = Action.async { implicit request =>
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
+    var params: Map[String, String] = getAPIParamsLiveDefault
+    form.bindFromRequest.fold(
+      errors => {
+        // use default params for initial access or parameter error
+      },
+      message => {
+        params = createAPIParams(message, params)
+      }
+    )
+
+    val response = search(Services.live, params)
+    var totalCount: Int = 0
+    var videoList: List[Live] = List()
+    Future.firstCompletedOf(Seq(response)) map {
+      response =>
+        response match {
+          case res: Option[Map[String,JsResult[ContentLive]]] => {
+            if (res.isDefined && !isError(res.get.head._2.get.meta)) {
+              totalCount = res.get.head._2.get.meta.totalCount.get
+              videoList = res.get.head._2.get.data.get.toList
+            } else {
+              totalCount = -1
+            }
+            Ok(views.html.live(params, totalCount, videoList, request.host, ""))
+          }
+        }
+    }
+  }
+
+  def illust = Action.async { implicit request =>
+    val form = Form(mapping("q" -> text, "t" -> list(text), "s" -> text, "r" -> optional(text), "p" -> optional(text))(Param.apply)(Param.unapply))
+    var params: Map[String, String] = getAPIParamsIllustDefault
+    form.bindFromRequest.fold(
+      errors => {
+        // use default params for initial access or parameter error
+      },
+      message => {
+        params = createAPIParams(message, params)
+      }
+    )
+
+    val response = search(Services.illust, params)
+    var totalCount: Int = 0
+    var videoList: List[Illust] = List()
+    Future.firstCompletedOf(Seq(response)) map {
+      response =>
+        response match {
+          case res: Option[Map[String,JsResult[ContentIllust]]] => {
+            if (res.isDefined && !isError(res.get.head._2.get.meta)) {
+              totalCount = res.get.head._2.get.meta.totalCount.get
+              videoList = res.get.head._2.get.data.get.toList
+            } else {
+              totalCount = -1
+            }
+            Ok(views.html.illust(params, totalCount, videoList, request.host, ""))
           }
         }
     }
@@ -124,8 +186,8 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       "_context" -> "nsearch")
   }
 
-  private def createAPIParams(message: Param): Map[String, String] = {
-    var params = getAPIParamsDefault
+  private def createAPIParams(message: Param, default: Map[String, String]): Map[String, String] = {
+    var params = default
     params foreach {
       case ("q", v) => params = params.updated("q", getParamsQuery(message.q).getOrElse(v))
       case ("targets", v) => params = params.updated("targets", getParamsTargets(message.t).getOrElse(v))
@@ -135,6 +197,7 @@ class SearchController @Inject() (ws: WSClient) extends Controller {
       case ("_sort", v) => params = params.updated("_sort", getParamsSort(message.s).getOrElse(v))
       case ("fields", v) =>
       case ("_context", v) =>
+      case _ =>
     }
 
     params
